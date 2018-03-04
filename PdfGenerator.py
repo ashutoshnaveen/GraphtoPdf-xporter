@@ -1,40 +1,50 @@
 import datetime
-import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as grd
 
-## PDF package
+# PDF package
 from matplotlib.backends.backend_pdf import PdfPages
 
 
-with PdfPages("multipage_pdf.pdf") as pdf:
-    plt.figure(figsize=(3,3))
-    plt.plot(range(7),[3,1,4,1,5,9,2],'r-o')
-    plt.title('page one')
-    pdf.savefig()       # save the current fig to Pdf pages
-    plt.close()
-
-    plt.rc('text',usetex=False)
-    fig1=plt.figure(figsize=(8,6))
-    x=np.arange(0,5,0.1)
-    plt.plot(x,np.sin(x),'b-')
-    plt.title('Page Two')   
-    pdf.attach_note("plot of sinx")
-
-    pdf.savefig(fig1)
-    plt.close()
+def data_loader():
+    with open("Input.txt", 'r') as f:
+        n = int(f.readline().strip())
+        x_label = f.readline().strip().split()
+        x = [list(map(int, f.readline().strip().split())) for i in range(n)]
+        y_label = f.readline().strip().split()
+        y = [list(map(int, f.readline().strip().split())) for i in range(n)]
+    return n, x_label, x, y_label, y
 
 
-    plt.rc('text',usetex=False)
-    fig2=plt.figure(figsize=(4,5))
-    plt.plot(x,x*x,'ko')
-    plt.title("Page three")
-    pdf.savefig(fig2)
-    plt.close()
+with PdfPages("GraphtoPdf.pdf") as pdf:
+    data = data_loader()
+    for i in range(0, data[0], 2):
+        #  A4 size in inches
+        plt.figure(figsize=(8.27, 11.69))
+        # gridspec object with grid parameters mxn
+        gs = grd.GridSpec(2, 1)
+        # Layout customization using top bottom left right parameters
+        gs.update(top=0.98)
+        plt.title("Page %d" % i)
+        for j in range(2):
+            if i+j>data[0]-1:
+                break
+            exec("ax = plt.subplot(gs[%d])"%j)
+            plt.plot(data[2][i+j], data[4][i+j], color='r', linewidth=2.0)
+            plt.xlabel("%s" % data[1][i+j])
+            plt.ylabel("%s" % data[3][i+j])
+            ax = plt.gca()
+            ax.set_facecolor((1, 1, 0.7))
+            # plt.title("%s" % title)
 
-    d=pdf.infodict()
-    d['Title']="Multipage Pdf"
-    d["Author"]="Ashutosh"
-    d["Subject"]="how to create a multipage pdf file with its metadata ausing matplotlib"
-    d['Keywords']="PdfPages multipage keywords author title subject"
-    d["CreationDate"]=datetime.datetime(2009,11,13)
-    d['ModDate']=datetime.datetime.today()
+        pdf.savefig()
+
+
+
+    d = pdf.infodict()
+    d['Title'] = "GraphtoPdf"
+    d["Author"] = "Ashutosh Naveen"
+    d["Subject"] = "Converted graphs from tabulated data"
+    d['Keywords'] = "PdfPages keywords author title subject"
+    d["CreationDate"] = datetime.datetime(2018, 3, 4)
+    d['ModDate'] = datetime.datetime.today()
