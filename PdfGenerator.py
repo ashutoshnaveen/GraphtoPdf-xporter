@@ -1,7 +1,7 @@
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as grd
-
+import math
 # PDF package
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -10,14 +10,21 @@ def data_loader():
     with open("Input.txt", 'r') as f:
         n = int(f.readline().strip())
         x_label = f.readline().strip().split()
-        x = [list(map(int, f.readline().strip().split())) for i in range(n)]
+        x = [list(map(float, f.readline().strip().split())) for i in range(n)]
+        #print(x)
+        for i in range(len(x)):
+            for j in range(len(x[i])):
+                x[i][j] = math.log(x[i][j])/math.log(10)
+        #print(x)
         y_label = f.readline().strip().split()
-        y = [list(map(int, f.readline().strip().split())) for i in range(n)]
-    return n, x_label, x, y_label, y
+        y = [list(map(float, f.readline().strip().split())) for i in range(n)]
+        title = f.readline().strip().split('*')
+    return n, x_label, x, y_label, y, title
 
 
 with PdfPages("GraphtoPdf.pdf") as pdf:
     data = data_loader()
+    num=0
     for i in range(0, data[0], 2):
         #  A4 size in inches
         plt.figure(figsize=(8.27, 11.69))
@@ -33,6 +40,8 @@ with PdfPages("GraphtoPdf.pdf") as pdf:
             plt.plot(data[2][i+j], data[4][i+j], color='r', linewidth=2.0)
             plt.xlabel("%s" % data[1][i+j])
             plt.ylabel("%s" % data[3][i+j])
+            plt.title(data[5][i+j])
+            #print(data[5])
             ax = plt.gca()
             ax.set_facecolor((1, 1, 0.7))
             # plt.title("%s" % title)
